@@ -19,8 +19,11 @@ test.before(async () => {
 })
 
 test.after(async () => {
-  await Mongoose.connection.db.dropDatabase()
-  await Mongoose.disconnect()
+  try {
+    await Mongoose.connection.db.dropDatabase()
+  } finally {
+    await Mongoose.disconnect()
+  }
 })
 
 test('queries the replica set status', async () => {
