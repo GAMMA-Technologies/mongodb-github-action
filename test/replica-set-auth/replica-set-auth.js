@@ -20,7 +20,7 @@ test.before(async () => {
 
 test.after(async () => {
   try {
-    await Mongoose.connection.db.dropDatabase()
+    await Mongoose.connection.db.dropDatabase({ writeConcern: { w: 'majority' } })
   } finally {
     await Mongoose.disconnect()
   }
