@@ -4,10 +4,10 @@ const { test } = require('uvu')
 const { expect } = require('expect')
 const Mongoose = require('mongoose')
 
-const { MONGODB_PORT = 27017, MONGODB_REPLICA_SET = 'mongodb-test-rs' } = process.env
+const { MONGODB_PORT = 27017, MONGODB_REPLICA_SET = 'mongodb-test-rs', MONGODB_USERNAME = 'md-user', MONGODB_PASSWORD = 'md-pwd', MONGODB_DB = 'md-test' } = process.env
 
 test.before(async () => {
-  const connectionString = `mongodb://localhost:${MONGODB_PORT}/test?replicaSet=${MONGODB_REPLICA_SET}`
+  const connectionString = `mongodb://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@localhost:${MONGODB_PORT}/${MONGODB_DB}?replicaSet=${MONGODB_REPLICA_SET}`
 
   console.log('---------------------------------------------------------------------')
   console.log('connecting to MongoDB using connection string -> ' + connectionString)

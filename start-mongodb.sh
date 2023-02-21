@@ -53,6 +53,8 @@ echo "::group::Starting MongoDB as single-node replica set"
 echo "  - port [$MONGODB_PORT]"
 echo "  - version [$MONGODB_VERSION]"
 echo "  - replica set [$MONGODB_REPLICA_SET]"
+echo "  - database [$MONGODB_DB]"
+echo "  - credentials [$MONGODB_USERNAME:$MONGODB_PASSWORD]"
 echo ""
 
 docker run --name mongodb --publish $MONGODB_PORT:$MONGODB_PORT --detach mongo:$MONGODB_VERSION --replSet $MONGODB_REPLICA_SET --port $MONGODB_PORT
@@ -103,3 +105,19 @@ docker exec --tty mongodb $MONGO_CLIENT --port $MONGODB_PORT --eval "
   rs.status()
 "
 echo "::endgroup::"
+
+if [ -n "$MONGODB_DB" ]; then
+  echo "::group::Creating database [$MONGODB_DB]"
+  docker exec --tty mongodb $MONGO_CLIENT --port $MONGODB_PORT --eval "
+    db.getSiblingDB('$MONGODB_DB').createCollection('empty')
+  "
+  echo "::endgroup::"
+
+  if [[ -n "$MONGODB_USERNAME" && -n "$MONGODB_PASSWORD" ]]; then
+    echo "::group::Creating credentials [$MONGODB_USERNAME/$MONGODB_PASSWORD] on [$MONGODB_DB]"
+    docker exec --tty mongodb $MONGO_CLIENT --port $MONGODB_PORT --eval "
+      db.getSiblingDB('$MONGODB_DB').createUser({ user: '$MONGODB_USERNAME', pwd: '$MONGODB_PASSWORD', roles: [{ role: 'dbOwner', db: '$MONGODB_DB' }]})
+    "
+    echo "::endgroup::"
+  fi
+fi
